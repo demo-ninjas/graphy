@@ -1,0 +1,9 @@
+graphrag
+azure-core
+azure-ai-formrecognizer
+pandas
+tqdm
+future
+
+azure-core
+azure-cosmos

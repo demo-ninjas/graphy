@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import json
+from pathlib import Path
+import dotenv
+dotenv.load_dotenv(".env")
+
+import asyncio
+from graphy.ingest.parser import DocumentParser, DocumentParserConfig
+
+async def main():
+    args = _parse_args()
+
+    if "--help" in args:
+        print("Usage: parse-file --file=<file_path> [--output-dir=<output_dir>] [--markdown=<true|false>] [--json=<true|false>] [--min-chunk-chars=<min_chunk_chars>] [--title-height=<title_height>] [--subtitle-height=<subtitle_height>] [--paragraph-height=<paragraph_height>]")
+        print("")
+        print("Options:")
+        print("  --file=<file_path>                 The file to parse")
+        print("  --output-dir=<output_dir>           The directory to save the output to (default: input)")
+        print("  --markdown=<true|false>             Save the markdown representation (default: true)")
+        print("  --json=<true|false>                 Save the json representation (default: true)")
+        print("  --min-chunk-chars=<min_chunk_chars> The minimum number of characters in a chunk (default: 50)")
+        print("  --title-height=<title_height>       The height of the title (default: 1.5)")
+        print("  --subtitle-height=<subtitle_height> The height of the subtitle (default: 1.25)")
+        print("  --paragraph-height=<paragraph_height> The height of the paragraph (default: 1.0)")
+        return
+
+    # Load the configuration (currently not offering option of modifying from defaults)
+    config = DocumentParserConfig()
+    if "--min-chunk-chars" in args:
+        config.min_chunk_chars = int(args["--min-chunk-chars"])
+    if "--title-height" in args:
+        config.title_height = float(args["--title-height"])
+    if "--subtitle-height" in args:
+        config.subtitle_height = float(args["--subtitle-height"])
+    if "--paragraph-height" in args:
+        config.paragraph_height = float(args["--paragraph-height"])
+        
+    # Create the parser
+    parser = DocumentParser(config)
+
+    # Determine File path
+    file_path = args.get("--file", os.getenv('FILE_PATH', None))
+    if file_path is None:
+        print("No file path provided - you must specify a file using '--file', eg:")
+        print("python parse-file.py --file=<file_path>")
+        return
+
+    print(f"Parsing file: {file_path}")
+    result = parser.parse(file_path)
+
+    ## Directory to save the output to (default: input - which seems like a bad default, but it's the typical location where graphrag ingests files from)
+    output_path = Path(args.get("--output-dir", os.getenv('OUTPUT_DIR', "input")))
+
+    ## Save the result to a file
+    data_file_path = Path(file_path)
+
+    save_markdown = args.get("--markdown", os.getenv('SAVE_MARKDOWN', "true")).lower() in ["true", "yes", "1"]
+    save_json = args.get("--json", os.getenv('SAVE_JSON', "true")).lower() in ["true", "yes", "1"]
+
+    if save_markdown:
+        markdown_output_file = output_path / f"{data_file_path.stem}.md"
+        print(f"Writing Markdown Representation to :{markdown_output_file}")
+        with open(markdown_output_file, 'w') as f:
+            f.write(result.as_text())
+
+    if save_json:
+        json_output_file = output_path / f"{data_file_path.stem}.json"
+        print(f"Writing JSON Representation to :{json_output_file}")
+        with open(json_output_file, 'w') as f:
+            f.write(json.dumps(result.to_dict(), indent=4))
+
+    print(f"Done!")
+
+
+def _parse_args() -> dict[str, str]:
+    args = sys.argv[1:]
+    if len(args) == 0:
+        return {}
+    res = {}
+    for arg in args: 
+        if arg.startswith("--"):
+            arr = arg.split("=")
+            key = arr[0]
+            value = arr[1] if len(arr) > 1 else True
+            res[key] = value
+    return res
+
+
+
+if __name__ ==  '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())

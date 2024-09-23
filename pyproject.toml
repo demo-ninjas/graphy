@@ -1,0 +1,40 @@
+[project]
+name = "graphy"
+version = "0.1.1"
+authors = [
+  { name="Stricko", email="adams@strickos.com" },
+]
+description = "A small wrapper around GraphRAG that adds cosmos DB as a datastore."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'graphrag',
+    'azure-core',
+    'azure-ai-formrecognizer',
+    'pandas',
+    'tqdm',
+    'future',
+    'azure-core',
+    'azure-cosmos'
+]
+
+[project.scripts]
+build-graph = "bin.build_graph:main"
+ingest-file = "bin.ingest_file:main"
+inspect-data = "bin.inspect_data:main"
+parse-all = "bin.parse_all:main"
+parse-file = "bin.parse_file:main"
+publish-graph = "bin.publish_graph:main"
+query = "bin.query:main"
+query-db = "bin.query_db:main"
+verify-data-in-db = "bin.verify_data_in_db:main"
+visualise-graph = "bin.visualise_graph:main"
+
+[project.urls]
+Homepage = "https://github.com/demo-ninjas/graphy"
+Issues = "https://github.com/demo-ninjas/graphy/issues"

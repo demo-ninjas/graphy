@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+import asyncio
+import sys
+import os
+
+from graphy.ingest.parser import DocumentParser, DocumentParserConfig
+from graphy.ingest import parse_file
+
+import dotenv
+dotenv.load_dotenv(".env")
+\
+async def main():
+    args = _parse_args()
+
+    if "--help" in args:
+        print("Usage: parse-all --source=<source_dir> --target=<target_dir> --markdown=<true|false> --json=<true|false> --concurrency=<num_threads>")
+        print("")
+        print("Options:")
+        print("  --source=<source_dir>                  The source directory to read files from (default: 'source')")
+        print("  --target=<target_dir>                  The target directory to save the parsed files to (default: 'input')")
+        print("  --markdown=<true|false>                Whether to save the parsed markdown files (default: true)")
+        print("  --json=<true|false>                    Whether to save the parsed json files (default: true)")
+        print("  --concurrency=<num_threads>            The number of threads to use for processing (default: 4)")
+        return
+    
+    print("Initialising...")
+    # Load the configuration (currently not offering option of modifying from defaults)
+    config = DocumentParserConfig()
+    if "--min-chunk-chars" in args:
+        config.min_chunk_chars = int(args["--min-chunk-chars"])
+    if "--title-height" in args:
+        config.title_height = float(args["--title-height"])
+    if "--subtitle-height" in args:
+        config.subtitle_height = float(args["--subtitle-height"])
+    if "--paragraph-height" in args:
+        config.paragraph_height = float(args["--paragraph-height"])
+        
+    # Create the parser
+    parser = DocumentParser(config)
+
+    ## Determine Source Directory
+    source_dir = Path(args.get("--source", os.getenv('SOURCE_DIR', "source")))
+
+    ## Determine Target Directory (Defaults to "input" - this might seem like a bad default, but it's the typical location where graphrag ingests files from)
+    target_dir = Path(args.get("--target", os.getenv('TARGET_DIR', "input")))
+    
+    save_markdown = args.get("--markdown", os.getenv('SAVE_MARKDOWN', "true")).lower() in ["true", "yes", "1"]
+    save_json = args.get("--json", os.getenv('SAVE_JSON', "true")).lower() in ["true", "yes", "1"]
+
+    ## Iterate over the files in the "source" directory
+    print(f"Processing files in {source_dir}...")
+    concurrency = int(args.get("--concurrency", os.getenv('CONCURRENCY', 4)))
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        for file in source_dir.iterdir():
+            if file.is_file() and file.suffix in [".pdf", ".docx", ".html", ".xls", ".xlsx", ".pptx", ".ppt"]:
+                executor.submit(parse_file, file, parser, target_dir, save_markdown, save_json, True)
+        executor.shutdown(wait=True)
+
+    print("Done.")
+
+def _parse_args() -> dict[str, str]:
+    args = sys.argv[1:]
+    if len(args) == 0:
+        return {}
+    res = {}
+    for arg in args: 
+        if arg.startswith("--"):
+            arr = arg.split("=")
+            key = arr[0]
+            value = arr[1] if len(arr) > 1 else True
+            res[key] = value
+    return res
+
+
+    
+if __name__ ==  '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
