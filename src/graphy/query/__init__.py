@@ -7,6 +7,7 @@ from graphrag.query.context_builder.conversation_history import ConversationHist
 from azure.cosmos import DatabaseProxy
 
 from .result import GraphySearchResult
+from .callback import QueryCallback, _GlobalSearchCallbackToQueryCallback
 
 async def search(
     query: str,
@@ -22,6 +23,7 @@ async def search(
     load_sources: bool = False,
     gather_documents: bool = False,
     conversation_history: list[dict[str, str]] | None = None,
+    callback: QueryCallback | None = None
 ) -> GraphySearchResult:
     if config is None:
         from pathlib import Path
@@ -40,6 +42,10 @@ async def search(
 
     query_type = query_type.upper()
     if "GLOBAL" in query_type:
+        callbacks = None
+        if callback is not None:
+            callbacks = [ _GlobalSearchCallbackToQueryCallback(callback) ]
+
         result = await asyncio.create_task(global_search(
             config=config,
             db=db,
@@ -50,6 +56,7 @@ async def search(
             use_summary=use_summary,
             allow_general_knowledge=allow_general_knowledge,
             estimate_tokens=estimate_tokens,
+            callbacks=callbacks,
             query=query))
     else:
         raise ValueError(f"Query type {query_type} not supported")
