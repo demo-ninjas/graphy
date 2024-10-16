@@ -2,5 +2,15 @@
     "git.repositoryScanIgnoredFolders": [
         "node_modules",
         "runs"
-    ]
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/.vscode": false,
+        "**/node_modules": false,
+        "**/runs": true
+    },
+    "python.analysis.extraPaths": [
+        "src"   
+    ],
 }

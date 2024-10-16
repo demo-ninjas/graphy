@@ -1,6 +1,7 @@
 import asyncio
 
 from .global_search import global_search
+from .local_search import local_search
 
 from graphrag.config.models.graph_rag_config import GraphRagConfig
 from graphrag.query.context_builder.conversation_history import ConversationHistory
@@ -59,7 +60,12 @@ async def search(
             callbacks=callbacks,
             query=query))
     else:
-        raise ValueError(f"Query type {query_type} not supported")
+        result = await asyncio.create_task(local_search(
+            config=config,
+            db=db,
+            response_type=response_type,
+            query=query))
+    
 
     ## Parse the Results, look for sources + load them if requested              
     res = GraphySearchResult(

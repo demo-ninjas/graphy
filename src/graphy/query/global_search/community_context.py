@@ -16,7 +16,7 @@ from graphrag.query.context_builder.conversation_history import (
 )
 from graphrag.query.structured_search.base import GlobalContextBuilder
 
-from .context_builder import build_community_context
+from ..context_builder import build_community_context
 
 
 class GraphyGlobalCommunityContext(GlobalContextBuilder):

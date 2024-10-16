@@ -114,6 +114,14 @@ class Relationship:
         if not res or len(res) == 0: return []
         return [Relationship(x) for x in res]
 
+    def load_all_for_entity(entity_id:str, db:DatabaseProxy) -> tuple[list['Relationship'], list['Relationship']]:
+        """Load all the relationships for a specified entity return a tuple of list of relationships for (source, target) - where the entity is the source or target of the relationship"""
+        client = client_factory(RELATIONSHIP_CONTAINER_NAME, db)
+        res = list(client.query_items(f"SELECT * FROM c WHERE c.source = '{entity_id}' OR c.target = '{entity_id}'", enable_cross_partition_query=True))
+        if not res or len(res) == 0: return [], []
+        return [Relationship(x) for x in res if x["source"] == entity_id], [Relationship(x) for x in res if x["target"] == entity_id]
+    
+
     def load_source(self, db:DatabaseProxy) -> Entity:
         """Load the source Entity for this Relationship"""
         entity = Entity.load(self.source_id, db)

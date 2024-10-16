@@ -5,6 +5,7 @@ from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 from ..dataaccess import client_factory
 from ._pd_util import first_non_null
+import graphy
 
 ENTITY_CONTAINER_NAME = "entities"
 ENTITY_METADATA_CONTAINER_NAME = "entity-metadata"
@@ -102,6 +103,12 @@ class Entity:
     claims:list[EntityClaim]
     truncated_sources:bool = False
     truncated_claims:bool = False
+
+    ## Transient data used for local search
+    outbound_relationships:list['graphy.data.Relationship'] = None
+    inbound_relationships:list['graphy.data.Relationship'] = None
+    
+    
     
     def __init__(self, data:dict = None):
         if data:
@@ -184,6 +191,13 @@ class Entity:
             self.description_embedding = metadata.get("description_embedding")
             self.metadata_loaded = True
         
+    def load_relationships(self, db:DatabaseProxy):
+        """Load the relationships for the entity"""
+        if self.outbound_relationships is not None and self.inbound_relationships is not None: return
+        import graphy.data as graphy_data
+        source, target = graphy_data.Relationship.load_all_for_entity(self.id, db)
+        self.outbound_relationships = source
+        self.inbound_relationships = target
 
     def load(id:str, db:DatabaseProxy, include_metadata:bool = False) -> 'Entity':
         """Load an Entity from the database by either the ID or the UID"""

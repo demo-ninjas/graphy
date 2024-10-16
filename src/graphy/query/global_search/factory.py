@@ -28,7 +28,7 @@ from graphrag.query.structured_search.global_search.callbacks import GlobalSearc
 
 from azure.cosmos import ContainerProxy, DatabaseProxy
 
-from ..factory import get_llm, get_text_embedder
+from ..factory import get_llm
 from .community_context import GraphyGlobalCommunityContext
 
 

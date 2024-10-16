@@ -45,6 +45,7 @@ def build_community_context(
     context_name: str = "Reports",
     random_state: int = 86,
     estimate_tokens: bool = True,
+    selected_communities: list[Community] | None = None,
 ) -> tuple[str | list[str], dict[str, pd.DataFrame]]:
     """
     Prepare community report data table as context data for system prompt.
@@ -81,7 +82,7 @@ def build_community_context(
     if include_community_weight:
         community_fields.extend(["weight", "normalised_weight"])
     
-    communities = Community.load_all_under_level(under_community_level, min_rank=min_community_rank, db=db, only_fields=community_fields)
+    communities = Community.load_all_under_level(under_community_level, min_rank=min_community_rank, db=db, only_fields=community_fields) if selected_communities is None else selected_communities
     time2 = time()
     if communities is None or len(communities) == 0:
         return ([], {})
