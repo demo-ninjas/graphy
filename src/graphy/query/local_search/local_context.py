@@ -121,7 +121,7 @@ def build_covariates_context(
                 claim.description if claim.description else "",
                 claim.start_date if claim.start_date else "",
                 claim.end_date if claim.end_date else "",
-                claim.status if claim.status else "",
+                str(claim.status) if claim.status else "?",
             ]
             new_context_text = column_delimiter.join(new_context) + "\n"
             new_tokens = num_tokens(new_context_text, token_encoder)
