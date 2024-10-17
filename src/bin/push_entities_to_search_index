@@ -7,6 +7,8 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 import azure.cosmos.cosmos_client as cosmos_client
+from azure.identity import DefaultAzureCredential
+
 from azure.cosmos import ContainerProxy, DatabaseProxy
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
@@ -31,21 +33,29 @@ async def main():
         return
 
     ## Load CosmosDB Client
-    cosmos_connection_str = os.environ.get("COSMOS_CONNECTION_STRING")
     cosmos_database = os.environ.get("COSMOS_DATABASE_ID", "cardiology-canon")
+    cosmos_connection_str = os.environ.get("COSMOS_CONNECTION_STRING")
+    cosmos_account = None
+    if not cosmos_connection_str:
+        ## Get Cosmos Account and use Managed Identity
+        cosmos_account = os.environ.get("COSMOS_ACCOUNT") or os.environ.get("COSMOS_ACCOUNT_NAME")
+        cosmos_key = os.environ.get("COSMOS_KEY")
+        if not cosmos_account:
+            raise ValueError("COSMOS_ACCOUNT or COSMOS_ACCOUNT_NAME must be set in the environment when not using a connection string")
+        if cosmos_account and cosmos_key:
+            if cosmos_account.startswith("https://"):
+                cosmos_connection_str = f"AccountEndpoint={cosmos_account};AccountKey={cosmos_key};"
+            else:
+                cosmos_connection_str = f"AccountEndpoint=https://{cosmos_account}.documents.azure.com:443/;AccountKey={cosmos_key};"
+        
+    if cosmos_connection_str: 
+        client = cosmos_client.CosmosClient.from_connection_string(cosmos_connection_str)
+    else:
+        if cosmos_account.startswith("https://"):
+            client = cosmos_client.CosmosClient(url=cosmos_account, credential=DefaultAzureCredential())
+        else:
+            client = cosmos_client.CosmosClient(url=f"https://{cosmos_account}.documents.azure.com:443/", credential=DefaultAzureCredential())
     
-    if '--db' in args: 
-        cosmos_database = args['--db']
-
-    if cosmos_connection_str is None or len(cosmos_connection_str) == 0:
-        print("Please provide the CosmosDB Connection String using the environment variable COSMOS_CONNECTION_STRING.")
-        return
-    
-    if cosmos_database is None or len(cosmos_database) == 0:
-        print("Please provide the CosmosDB Database ID using the environment variable COSMOS_DATABASE_ID or the --db flag.")
-        return
-
-    client = cosmos_client.CosmosClient.from_connection_string(cosmos_connection_str)
     db = client.get_database_client(cosmos_database)
 
     entity_container = "entities"
@@ -65,11 +75,11 @@ async def main():
     if service_endpoint is None or len(service_endpoint) == 0:
         print("Please provide the Azure Search Service Endpoint using the environment variable AZURE_SEARCH_SERVICE_ENDPOINT.")
         return
-    if key is None or len(key) == 0:
-        print("Please provide the Azure Search Admin API Key using the environment variable SEARCH_API_KEY.")
-        return
+    # if key is None or len(key) == 0:
+    #     print("Please provide the Azure Search Admin API Key using the environment variable SEARCH_API_KEY.")
+    #     return
 
-    creds = AzureKeyCredential(key)
+    creds = AzureKeyCredential(key) if key is not None else DefaultAzureCredential()
     search_client = SearchClient(service_endpoint, index_name, creds)
 
     ## Create Worker Pool
@@ -87,10 +97,11 @@ async def main():
     pbar = tqdm(total=len(entity_ids), desc=f"Publishing Entities")
     futures = []
     failures = []
+    uploaded_count = 0
+    publish_batch = []
     for entity_id in entity_ids:
         futures.append(pool.submit(_publish_entity, entity_id, db))
-        if len(futures) > 200:
-            publish_batch = []
+        if len(futures) > 1000:
             for future in futures:
                 result, id, msg = future.result()
                 pbar.update(1)
@@ -98,13 +109,13 @@ async def main():
                     failures.append({ "id": id, "message": msg })
                 else: 
                     publish_batch.append(result)
-                if len(publish_batch) > 100:
+                if len(publish_batch) > 500:
                     search_client.upload_documents(publish_batch)
+                    uploaded_count += len(publish_batch)
                     publish_batch = []
             futures = []
     
     if len(futures) > 0:
-        publish_batch = []
         for future in futures:
             result, id, msg = future.result()
             pbar.update(1)
@@ -112,17 +123,19 @@ async def main():
                 failures.append({ "id": id, "message": msg })
             else: 
                 publish_batch.append(result)
-            if len(publish_batch) > 100:
+            if len(publish_batch) > 500:
                 search_client.upload_documents(publish_batch)
+                uploaded_count += len(publish_batch)
                 publish_batch = []
         
         if len(publish_batch) > 0:
             search_client.upload_documents(publish_batch)
+            uploaded_count += len(publish_batch)
 
     pbar.close()
 
     if len(failures) == 0:
-        print("All Entities published successfully.")
+        print("All Entities published successfully (" + str(uploaded_count) + " entities).")
     else:
         print(f"{len(failures)} entities failed to publish.")
         print("Failures:")
