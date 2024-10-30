@@ -1,0 +1,157 @@
+{
+  "version": "0.2.0",
+  "inputs": [
+    {
+      "id": "runFolder",
+      "type": "promptString",
+      "description": "Enter the run directory",
+      "default": "test"
+    },
+    {
+      "id": "query",
+      "type": "promptString",
+      "description": "Enter the query",
+      "default": "What are the 5 most important themes?"
+    },
+    {
+      "id": "file",
+      "type": "promptString",
+      "description": "Enter the relative path to the file",
+      "default": "file.pdf"
+    }
+  ],
+
+  "configurations": [
+    {
+      "name": "Debug: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Build Graph",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/build_graph",
+      "console": "integratedTerminal",
+      "args": [],
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Publish Graph (to Cosmos)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/publish_graph",
+      "args": [],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+    
+    {
+      "name": "Push Entities to AI Search Index",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/push_entities_to_search_index",
+      "args": [],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Inspect Graph",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/inspect_data",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Visualise Graph",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/visualise_graph",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+    },
+    {
+      "name": "Query - Global",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/query_db",
+      "console": "integratedTerminal",
+      "args": ["--query=${input:query}", "--community-level=2", "--use-summary=true", "--query-type=global"],
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+    {
+      "name": "Query - Local",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/query_db",
+      "console": "integratedTerminal",
+      "args": ["--query=${input:query}", "--community-level=2", "--use-summary=true", "--query-type=local"],
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Parse Source Docs",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_all",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+    {
+      "name": "Parse Source Docs (Force Rebuild)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_all",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "args": ["--force"],
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+    {
+      "name": "Parse File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_file",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "args": ["--file=${input:file}"],
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    }
+  ]
+}

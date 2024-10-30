@@ -4,8 +4,6 @@ build/
 dist/
 *.egg-info/
 
-launch.json
-
 *.zip
 .env
 *.log
