@@ -1,6 +1,6 @@
 [project]
 name = "graphy"
-version = "0.1.9"
+version = "0.1.10"
 authors = [
   { name="Stricko", email="adams@strickos.com" },
 ]
@@ -15,7 +15,7 @@ classifiers = [
 dependencies = [
     'graphrag',
     'azure-core',
-    'azure-ai-formrecognizer',
+    'azure-ai-documentintelligence',
     'pandas',
     'tqdm',
     'future',

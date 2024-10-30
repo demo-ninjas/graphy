@@ -1,6 +1,6 @@
 graphrag
 azure-core
-azure-ai-formrecognizer
+azure-ai-documentintelligence
 pandas
 tqdm
 future
