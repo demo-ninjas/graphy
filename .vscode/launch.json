@@ -18,6 +18,12 @@
       "type": "promptString",
       "description": "Enter the relative path to the file",
       "default": "file.pdf"
+    },
+    {
+      "id": "test",
+      "type": "promptString",
+      "description": "Enter the test file",
+      "default": "test"
     }
   ],
 
@@ -38,7 +44,7 @@
       "name": "Build Graph",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/build_graph",
+      "program": "${workspaceFolder}/src/graphy/bin/build_graph.py",
       "console": "integratedTerminal",
       "args": [],
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
@@ -51,7 +57,7 @@
       "name": "Publish Graph (to Cosmos)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/publish_graph",
+      "program": "${workspaceFolder}/src/graphy/bin/publish_graph.py",
       "args": [],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
@@ -64,7 +70,7 @@
       "name": "Push Entities to AI Search Index",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/push_entities_to_search_index",
+      "program": "${workspaceFolder}/src/graphy/bin/push_entities_to_search_index.py",
       "args": [],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
@@ -77,7 +83,7 @@
       "name": "Inspect Graph",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/inspect_data",
+      "program": "${workspaceFolder}/src/graphy/bin/inspect_data.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "env": {
@@ -89,7 +95,7 @@
       "name": "Visualise Graph",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/visualise_graph",
+      "program": "${workspaceFolder}/src/graphy/bin/visualise_graph.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
     },
@@ -97,7 +103,7 @@
       "name": "Query - Global",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/query_db",
+      "program": "${workspaceFolder}/src/graphy/bin/query_db.py",
       "console": "integratedTerminal",
       "args": ["--query=${input:query}", "--community-level=2", "--use-summary=true", "--query-type=global"],
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
@@ -109,7 +115,7 @@
       "name": "Query - Local",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/query_db",
+      "program": "${workspaceFolder}/src/graphy/bin/query_db.py",
       "console": "integratedTerminal",
       "args": ["--query=${input:query}", "--community-level=2", "--use-summary=true", "--query-type=local"],
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
@@ -122,7 +128,7 @@
       "name": "Parse Source Docs",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/parse_all",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_all.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "env": {
@@ -133,7 +139,7 @@
       "name": "Parse Source Docs (Force Rebuild)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/parse_all",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_all.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "args": ["--force"],
@@ -145,10 +151,22 @@
       "name": "Parse File",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/src/graphy/bin/parse_file",
+      "program": "${workspaceFolder}/src/graphy/bin/parse_file.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "args": ["--file=${input:file}"],
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+
+    {
+      "name": "Run Test",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/${input:test}.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "env": {
         "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
       }

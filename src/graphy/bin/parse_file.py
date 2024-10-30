@@ -150,6 +150,9 @@ def _parse_args() -> dict[str, str]:
 
 
 
-if __name__ ==  '__main__':
+def run_main():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
+    
+if __name__ ==  '__main__':
+    run_main()

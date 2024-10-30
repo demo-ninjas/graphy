@@ -77,6 +77,9 @@ def _infer_latest_run(root: str) -> str:
     raise ValueError(msg)
 
 
-if __name__ ==  '__main__':
+def run_main():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
+    
+if __name__ ==  '__main__':
+    run_main()
