@@ -1,6 +1,6 @@
 [project]
 name = "graphy"
-version = "0.1.6"
+version = "0.1.7"
 authors = [
   { name="Stricko", email="adams@strickos.com" },
 ]
@@ -25,17 +25,17 @@ dependencies = [
 ]
 
 [project.scripts]
-build-graph = "bin.build_graph:main"
-ingest-file = "bin.ingest_file:main"
-inspect-data = "bin.inspect_data:main"
-parse-all = "bin.parse_all:main"
-parse-file = "bin.parse_file:main"
-publish-graph = "bin.publish_graph:main"
-push-entities-to-search-index = "push_entities_to_search_index:main"
-query = "bin.query:main"
-query-db = "bin.query_db:main"
-verify-data-in-db = "bin.verify_data_in_db:main"
-visualise-graph = "bin.visualise_graph:main"
+build-graph = "graphy.bin.build_graph:main"
+ingest-file = "graphy.bin.ingest_file:main"
+inspect-data = "graphy.bin.inspect_data:main"
+parse-all = "graphy.bin.parse_all:main"
+parse-file = "graphy.bin.parse_file:main"
+publish-graph = "graphy.bin.publish_graph:main"
+push-entities-to-search-index = "graphy.bin.push_entities_to_search_index:main"
+query = "graphy.bin.query:main"
+query-db = "graphy.bin.query_db:main"
+verify-data-in-db = "graphy.bin.verify_data_in_db:main"
+visualise-graph = "graphy.bin.visualise_graph:main"
 
 [project.urls]
 Homepage = "https://github.com/demo-ninjas/graphy"
