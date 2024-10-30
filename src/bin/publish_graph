@@ -9,6 +9,7 @@ import dotenv
 dotenv.load_dotenv(".env")
 
 import azure.cosmos.cosmos_client as cosmos_client
+from azure.identity import DefaultAzureCredential
 from azure.cosmos import ContainerProxy, DatabaseProxy
 from azure.cosmos.errors import CosmosResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -102,10 +103,32 @@ async def main():
         final_documents = pd.read_parquet(f"{data_path.as_posix()}/create_final_documents.parquet")
 
     ## Load CosmosDB Client
+    ## Load CosmosDB Client
+    cosmos_database = os.environ.get("COSMOS_DATABASE_ID", "graph-database")
     cosmos_connection_str = os.environ.get("COSMOS_CONNECTION_STRING")
-    cosmos_database = os.environ.get("COSMOS_DATABASE_ID", "cardiology-canon")
-    client = cosmos_client.CosmosClient.from_connection_string(cosmos_connection_str)
+    cosmos_account = None
+    if not cosmos_connection_str:
+        ## Get Cosmos Account and use Managed Identity
+        cosmos_account = os.environ.get("COSMOS_ACCOUNT") or os.environ.get("COSMOS_ACCOUNT_NAME")
+        cosmos_key = os.environ.get("COSMOS_KEY")
+        if not cosmos_account:
+            raise ValueError("COSMOS_ACCOUNT or COSMOS_ACCOUNT_NAME must be set in the environment when not using a connection string")
+        if cosmos_account and cosmos_key:
+            if cosmos_account.startswith("https://"):
+                cosmos_connection_str = f"AccountEndpoint={cosmos_account};AccountKey={cosmos_key};"
+            else:
+                cosmos_connection_str = f"AccountEndpoint=https://{cosmos_account}.documents.azure.com:443/;AccountKey={cosmos_key};"
+        
+    if cosmos_connection_str: 
+        client = cosmos_client.CosmosClient.from_connection_string(cosmos_connection_str)
+    else:
+        if cosmos_account.startswith("https://"):
+            client = cosmos_client.CosmosClient(url=cosmos_account, credential=DefaultAzureCredential())
+        else:
+            client = cosmos_client.CosmosClient(url=f"https://{cosmos_account}.documents.azure.com:443/", credential=DefaultAzureCredential())
+    
     db = client.get_database_client(cosmos_database)
+
 
     ## Create Worker Pool
     pool = ThreadPoolExecutor(max_workers=50)

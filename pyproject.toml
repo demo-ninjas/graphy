@@ -1,6 +1,6 @@
 [project]
 name = "graphy"
-version = "0.1.5"
+version = "0.1.6"
 authors = [
   { name="Stricko", email="adams@strickos.com" },
 ]
@@ -19,6 +19,7 @@ dependencies = [
     'pandas',
     'tqdm',
     'future',
+    'PyMuPDF',
     'azure-core',
     'azure-cosmos'
 ]

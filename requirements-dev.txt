@@ -4,6 +4,7 @@ azure-ai-formrecognizer
 pandas
 tqdm
 future
+PyMuPDF
 
 azure-core
 azure-cosmos

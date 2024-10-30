@@ -1,57 +1,23 @@
 from pathlib import Path
 import atexit
 
-from graphrag.index import run_pipeline_with_config
-from graphrag.index import create_pipeline_config
-
-from graphrag.index.emit import TableEmitterType
+from graphrag.config import GraphRagConfig
 
 from graphy.monitor.build_progress_reporter import BuildProgressReporter
 from graphy.monitor.build_workflow_monitor import WorkflowMonitor
-from .parser import DocumentParser
+from graphy.ingest.emit import CosmosEmitterType
+from graphy.ingest.create_pipeline_config import create_pipeline_config
+from .run import run_pipeline_with_config
 
-def parse_file(file:Path, parser:DocumentParser, target_dir:Path, save_markdown:bool, save_json:bool, print_logs:bool=False):
-    file_id = file.stem
-    output_file_name = file_id.replace(" ", "-").replace("--", "-").lower()
-    
-    marker_file = target_dir / f"{output_file_name}.json"
-    if marker_file.exists():
-        if print_logs:
-            print(f"Skipping: {file.name}...")
-        return
+# from .pipeline_config import create_pipeline_config
+# from graphrag.index.create_pipeline_config import create_pipeline_config
 
-    try: 
-        ## Parse the document
-        if print_logs:
-            print(f"Processing: {file.name}...")
-        parsed_document = parser.parse(file.absolute().as_posix())
+from .workflows.graphy_create_base_text_units import workflow_name as create_base_text_units
+from .workflows.graphy_create_base_text_units import build_steps as build_create_base_text_units_steps
 
-        if parsed_document.title is None:
-            parsed_document.title = file_id
+## Load all the Graphy Verbs
+from .verbs import *  # noqa
 
-        if save_markdown:
-            ## Write out a raw MD Text file
-            content = parsed_document.as_text()
-            with open(target_dir / f"{output_file_name}.md", "w") as f:
-                f.write(content)
-        
-        if save_json:
-            ## Write out a JSON file
-            with open(marker_file, "w") as f:
-                import json
-                f.write(json.dumps(parsed_document.to_dict(), indent=4))
-
-        if print_logs:
-            print(f"Finished Processing: {file.name}.")
-    except Exception as e:
-        if print_logs:
-            print(f"Error processing: {file.name}, Error: {e}")
-        with open(target_dir / f"{output_file_name}.error", "w") as f:
-            f.write(str(e) + "\n\n")
-            import traceback
-            traceback.print_exc(file=f)
-
-from graphrag.config import GraphRagConfig
 
 async def build_graph(config:GraphRagConfig, resume_run:bool=False, run_id:str|None=None, report_progress_to_console:bool=False):
     try: 
@@ -88,14 +54,23 @@ async def build_graph(config:GraphRagConfig, resume_run:bool=False, run_id:str|N
             if run_id is not None: print("Resuming pipeline: " + run_id)
             else: print("Running pipeline...")
 
+        if  '${timestamp}' in config.storage.base_dir:
+            # Get current YYYMMDD 
+            import time
+            curr_date = time.strftime("%Y%m%d%H%M%S")
+            config.storage.base_dir = config.storage.base_dir.replace('${timestamp}', curr_date)
+
         async for output in run_pipeline_with_config(
                                 config_or_path=pipeline_config, 
                                 is_resume_run=resume_run, 
                                 run_id=run_id,
                                 callbacks=callback,
                                 progress_reporter=progress_reporter, 
-                                emit=[ TableEmitterType.Parquet ], 
-                                workflows=pipeline_config.workflows
+                                emit=[ CosmosEmitterType ], 
+                                workflows=pipeline_config.workflows,
+                                additional_workflows={ 
+                                    create_base_text_units: build_create_base_text_units_steps
+                                },
                             ):
             
             if report_progress_to_console:

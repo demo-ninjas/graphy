@@ -11,7 +11,7 @@ from .relationship import Relationship
 from .text_unit import TextUnit
 from .document import Document
 
-EXTRACTOR = re.compile(r"\[Data\:\s+(Reports\s?\((?P<reports>[\d,\s(\+more)]+)\))?\;?\s?(Entities\s?\((?P<entities>[\d,\s(\+more)]+)\))?\;?\s?(Relationships\s?\((?P<relationsips>[\d\s,(\+more)]+)\))?\s?\]")
+EXTRACTOR = re.compile(r"(\[Data\:\s+)?(Reports\s?\((?P<reports>[\d,\s(\+more)]+)\))?\;?\s?(Entities\s?\((?P<entities>[\d,\s(\+more)]+)\))?\;?\s?(Relationships\s?\((?P<relationsips>[\d\s,(\+more)]+)\))?\s?\]?")
 
 class SourceReference:
     id:int
@@ -228,9 +228,9 @@ class SourceReference:
             counter+=1
             span = match.span()
             groups = match.groupdict()
-            reports = [int(str(x).strip()) for x in groups["reports"].split(",") if x and '+more' not in x] if groups.get("reports") else None
-            enties = [int(str(x).strip()) for x in groups["entities"].split(",") if x and '+more' not in x] if groups.get("entities") else None
-            relationships = [int(str(x).strip()) for x in groups["relationsips"].split(",") if x and '+more' not in x] if groups.get("relationsips") else None
+            reports = [int(str(x).strip()) for x in groups["reports"].split(",") if x is not None and '+more' not in x] if groups.get("reports") else None
+            enties = [int(str(x).strip()) for x in groups["entities"].split(",") if x is not None and '+more' not in x] if groups.get("entities") else None
+            relationships = [int(str(x).strip()) for x in groups["relationsips"].split(",") if x is not None and '+more' not in x] if groups.get("relationsips") else None
             sources.append(SourceReference(id=counter, communities=reports, entities=enties, relationships=relationships, start=span[0], end=span[1]))
 
         if update_txt_refs:
@@ -252,4 +252,15 @@ class SourceReference:
         updated = txt[:start_pos] + new_ref_str + txt[end_pos:]
         return updated, new_length - original_length
         
-    
+if __name__ == '__main__':
+    txt = "This is a test text with a reference to [Data: Reports(1); Entities(2, 3); Relationships(4, 5, 6)] and another reference to Reports(7). What do you think?"
+    sources, updated_txt = SourceReference.parse_sources(txt)
+    print(updated_txt)
+    for source in sources:
+        print(source)
+        print()
+        print()
+        print()
+        print()
+        source.load(None)
+        print(source)

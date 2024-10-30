@@ -5,7 +5,7 @@ import asyncio
 import dotenv
 dotenv.load_dotenv(".env")
 
-from graphrag.config import create_graphrag_config
+from graphy.config import create_graphrag_config
 from graphy.ingest import build_graph
 
 async def main():
@@ -47,7 +47,7 @@ async def main():
             run_id = _infer_latest_run(".")
     
     ## Build the Graph
-    build_graph(graphrag_config, is_resume, run_id, True)
+    await build_graph(graphrag_config, is_resume, run_id, True)
     
 
 def _parse_args() -> dict[str, str]:
