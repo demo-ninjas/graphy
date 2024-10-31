@@ -58,7 +58,19 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/src/graphy/bin/publish_graph.py",
-      "args": [],
+      "args": ["--all"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "env": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
+      }
+    },
+    {
+      "name": "Publish Graph - Force Update (to Cosmos)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/graphy/bin/publish_graph.py",
+      "args": ["--force", "--all"],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
       "env": {

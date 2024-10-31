@@ -11,7 +11,7 @@ from .relationship import Relationship
 from .text_unit import TextUnit
 from .document import Document
 
-EXTRACTOR = re.compile(r"(\[Data\:\s+)?(Reports\s?\((?P<reports>[\d,\s(\+more)]+)\))?\;?\s?(Entities\s?\((?P<entities>[\d,\s(\+more)]+)\))?\;?\s?(Relationships\s?\((?P<relationsips>[\d\s,(\+more)]+)\))?\s?\]?")
+EXTRACTOR = re.compile(r"\[Data\:\s+(Reports\s?\((?P<reports>[\d,\s(\+more)]+)\))?\;?\s?(Entities\s?\((?P<entities>[\d,\s(\+more)]+)\))?\;?\s?(Relationships\s?\((?P<relationsips>[\d\s,(\+more)]+)\))?\s?\]")
 
 class SourceReference:
     id:int

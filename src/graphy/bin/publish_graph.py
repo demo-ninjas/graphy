@@ -59,6 +59,7 @@ async def main():
     COMMUNITY_LEVEL = 2
 
     data_path = Path(INPUT_DIR)
+    print("Using Data Path: ", data_path)
     
     is_all = '--all' in args
 
