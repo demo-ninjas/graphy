@@ -509,6 +509,122 @@ Product Category C: 30%
 """
 
 
+ITERATIVE_ANALYSIS_FORMULA = """Analyse the image of the equation provided and return the equation in LaTeX format.
+
+eg. If the image contains the equation that is the integral symbol (∫) followed by the lower limit of integration (a) and the upper limit of integration (b), where the integrand function (x^2) and the differential (dx) indicates that the variable of integration is (x).
+
+
+Then, return the latex format of the equation as follows, eg: 
+
+$$
+\int_{a}^{b} x^2 dx
+$$
+
+"""
+
+ITERATIVE_ANALYSIS_TEXT = """Analyse the image of the text provided and precisely extract the text from the image.
+
+Return only the text of the image, without any additional information or commentary.
+"""
+
+ITERATIVE_ANALYSIS_PICTURE_DIAGRAM = """Analyse the image of the diagram provided and describe the diagram as precisely as possible.
+
+If the diagram is a flowchart, describe how the process flows between tasks, incuding listing the tasks, their dependencies and the decision points in the process.
+
+If the diagram is a schematic, describe the components of the system, their relationships and the flow of data between them.
+
+If the diagram is a circuit diagram, describe the components of the circuit, their connections and the flow of current between them.
+
+If the diagram is a map, describe the geographical features, landmarks and the routes between them.
+
+If the diagram is a chart, describe the data series, axes and the interpretation of the data.
+
+If the diagram is a graph, describe the nodes and edges, their relationships and the flow of data between them.
+
+"""
+
+ITERATIVE_ANALYSIS_PICTURE_PHOTO = """Analyse the image of the photo provided and describe the content of the photo as precisely as possible.
+
+If the photo is a portrait, describe the person's appearance, clothing, expression and pose.
+
+If the photo is a landscape, describe the geographical features, landmarks and the environment.
+
+If the photo is a still life, describe the objects, their arrangement and the lighting.
+
+If the photo is a group photo, describe the people, their relationships and the context of the photo.
+
+If the photo is a candid shot, describe the moment captured, the emotions and the setting.
+
+"""
+
+ITERATIVE_ANALYSIS_PICTURE_DRAWING = """Analyse the image of the drawing provided and describe the content of the drawing as precisely as possible.
+
+If the drawing is a sketch, describe what the sketch is of, the style of the sketch and the medium used.
+
+If the drawing is a doodle, describe the random patterns, shapes and lines in the doodle.
+
+If the drawing is a caricature, describe the exaggerated features, the likeness to the subject and the humour in the caricature.
+
+If the drawing is a cartoon, describe the characters, the setting and the storyline in the cartoon.
+
+If the drawing is a painting, describe the subject, the style of the painting and the colours used.
+
+"""
+
+ITERATIVE_ANALYSIS_PICTURE_OTHER = """Analyse the image provided and describe the content of the image as precisely as possible."""
+
+ITERATIVE_ANALYSIS_RADIOGRAPH_XRAY = """Analyse the image of the X-ray provided and describe the content of the X-ray as precisely as possible.
+Include the date of the X-ray, the type of X-ray (eg. bone, chest, abdomen, skull, joint), and the location of the X-ray (eg. left arm, right leg, thoracic spine), if that information is visible.
+
+If the X-ray is of a bone, describe the bone structure, any fractures or abnormalities in the bone, including the location + severity. Also, provide the name of the bone if it can be easily identified.
+
+If the X-ray is of a chest, describe the lung structure, any abnormalities in the lungs, including the location + severity. Also, provide the name of the lung if it can be easily identified.
+
+If the X-ray is of an abdomen, describe the organ structure, any abnormalities in the organs, including the location + severity.
+
+If the X-ray is of a skull, describe the skull structure, any abnormalities in the skull, including the location + severity.
+
+If the X-ray is of a joint, describe the joint structure, any abnormalities in the joint, including the location + severity. Also, provide the name of the joint if it can be easily identified.
+
+"""
+
+ITERATIVE_ANALYSIS_RADIOGRAPH_MRI = """Analyse the image of the MRI provided and describe the content of the MRI as precisely as possible.
+Include the date of the MRI, the type of MRI (eg. T1, T2, FLAIR, DWI, etc.), and the sequence of the MRI (eg. axial, sagittal, coronal), if that information is visible.
+
+If the MRI is of a brain, describe the brain structure, any abnormalities in the brain, including the location + severity of the abnormality.
+
+If the MRI is of a spine, describe the spine structure, any abnormalities in the spine, including the location + severity of the abnormality.
+
+If the MRI is of a knee, describe the knee structure, any abnormalities in the knee, including the location + severity of the abnormality.
+
+If the MRI is of a shoulder, describe the shoulder structure, any abnormalities in the shoulder, including the location + severity of the abnormality.
+
+If the MRI is of a hip, describe the hip structure, any abnormalities in the hip, including the location + severity of the abnormality.
+
+"""
+
+ITERATIVE_ANALYSIS_RADIOGRAPH_CT = """Analyse the image of the CT scan provided and describe the content of the CT scan as precisely as possible.
+Inclnude the date of the CT scan, the type of CT scan (eg. head, chest, abdomen, pelvis, spine), and the sequence of the CT scan (eg. axial, sagittal, coronal), if that information is visible.
+
+If the CT scan is of a head, describe the head structure, any abnormalities in the head, including the location + severity of the abnormality.
+
+If the CT scan is of a chest, describe the chest structure, any abnormalities in the chest, including the location + severity of the abnormality.
+
+If the CT scan is of an abdomen, describe the abdomen structure, any abnormalities in the abdomen, including the location + severity of the abnormality.
+
+If the CT scan is of a pelvis, describe the pelvis structure, any abnormalities in the pelvis, including the location + severity of the abnormality.
+
+If the CT scan is of a spine, describe the spine structure, any abnormalities in the spine, including the location + severity of the abnormality.
+
+"""
+
+ITERATIVE_ANALYSIS_RADIOGRAPH_OTHER = """Analyse the image of the radiograph provided and describe the content of the radiograph as precisely as possible.
+Include the date of the radiograph, the type of radiograph (eg. X-ray, MRI, CT, PET), and the location of the radiograph (eg. left arm, right leg, thoracic spine), if that information is visible.
+"""
+
+
+ITERATIVE_ANALYSIS_OTHER = """Analyse the image provided and describe the content of the image as precisely as possible."""
+
 
 
 DEFAULT_ANALYSIS_MESSAGE = """Analyse the user's image and follow the instructions of the first matching rule below: 
@@ -610,9 +726,9 @@ def analyse_image_data_iteratively(data:bytes|str, img_ext:str, llm:ChatOpenAI, 
     if output is None:
         return output
     
-    data = json.loads(output)
-    category = data.get("category", None)
-    sub_category = data.get("sub_category", None)
+    classifier_data = json.loads(output)
+    category = classifier_data.get("category", None)
+    sub_category = classifier_data.get("sub_category", None)
     if category is None:
         return None
     if sub_category is None:
@@ -668,9 +784,32 @@ def analyse_image_data_iteratively(data:bytes|str, img_ext:str, llm:ChatOpenAI, 
             prompt = ITERATIVE_ANALYSIS_CHART_RULES_GANTT
         else:
             prompt = ITERATIVE_ANALYSIS_CHART_RULES_OTHER
+    elif category == "formula":
+        prompt = ITERATIVE_ANALYSIS_FORMULA
+    elif category == "text":
+        prompt = ITERATIVE_ANALYSIS_TEXT
+    elif category == "picture":
+        if sub_category == "diagram":
+            prompt = ITERATIVE_ANALYSIS_PICTURE_DIAGRAM
+        elif sub_category == "photo":
+            prompt = ITERATIVE_ANALYSIS_PICTURE_PHOTO
+        elif sub_category == "drawing":
+            prompt = ITERATIVE_ANALYSIS_PICTURE_DRAWING
+        else:
+            prompt = ITERATIVE_ANALYSIS_PICTURE_OTHER
+    elif category == "radiograph":
+        if sub_category == "x-ray":
+            prompt = ITERATIVE_ANALYSIS_RADIOGRAPH_XRAY
+        elif sub_category == "mri":
+            prompt = ITERATIVE_ANALYSIS_RADIOGRAPH_MRI
+        elif sub_category == "ct":
+            prompt = ITERATIVE_ANALYSIS_RADIOGRAPH_CT
+        else:
+            prompt = ITERATIVE_ANALYSIS_RADIOGRAPH_OTHER
     else:
-        pass
+        prompt = ITERATIVE_ANALYSIS_OTHER
     
+    output = analyse_image_data(data, img_ext, llm, prompt, max_retries, section_name, prior_context, post_context)
     return output
 
 

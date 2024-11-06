@@ -14,7 +14,7 @@ from fitz import Pixmap, Matrix
 from fitz import open as FitzOpen
 
 from .parser import Parser, ParsedDocument, DocumentChunkRect
-from .img_analyser import analyse_image_data
+from .img_analyser import analyse_image_data, analyse_image_data_iteratively
 
 class PdfDocIntelligenceParser(Parser):
     def __init__(self, config:dict[str, any], llm:ChatOpenAI):
@@ -29,7 +29,7 @@ class PdfDocIntelligenceParser(Parser):
         self.min_chunk_chars = int(config.get('min-chunk-chars') or 1200)
 
         self.title_ignores = config.get('title-ignores') or ["journal", "volume", "issue", "page", "date", "doi", "abstract", "introduction", "conclusion", "acknowledgements", "references", "appendix", "figure", "table", "author", "editor", "reviewer", "keywords", "index", "bibliography", "publication", "submission", "correspondence", "contact", "about", "terms", "privacy", "policy", "license", "copyright"]
-
+        self.use_iterative_image_analyser = config.get('use-iterative-image-analyser', True)
         self.client = DocumentIntelligenceClient(
             endpoint=self.endpoint, credential=AzureKeyCredential(self.key), api_version="2024-07-31-preview"
         )
@@ -107,7 +107,10 @@ class PdfDocIntelligenceParser(Parser):
                                 post_context = self.find_post_context(markdown, span.offset+span.length)
                                 def describe_image(image_bytes, figure_id, llm, section_name, prior_context, post_context, image_name):
                                     try:
-                                        result = analyse_image_data(image_bytes, "png", llm, section_name=section_name, prior_context=prior_context, post_context=post_context)
+                                        if self.use_iterative_image_analyser:
+                                            result = analyse_image_data_iteratively(image_bytes, "png", llm, section_name=section_name, prior_context=prior_context, post_context=post_context)
+                                        else: 
+                                            result = analyse_image_data(image_bytes, "png", llm, section_name=section_name, prior_context=prior_context, post_context=post_context)
                                     except Exception as e:
                                         result = "<!-- There was an error analysing the image -->"
                                     return (figure_id, result, image_name)
