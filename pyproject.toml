@@ -1,6 +1,6 @@
 [project]
 name = "graphy"
-version = "0.1.14"
+version = "0.1.15"
 authors = [
   { name="Stricko", email="adams@strickos.com" },
 ]
@@ -13,7 +13,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    'graphrag >=0.4.0, <= 0.5',
+    'graphrag >=0.3.0, <= 0.4',
     'azure-core',
     'azure-ai-documentintelligence',
     'pandas',
