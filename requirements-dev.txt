@@ -1,4 +1,4 @@
-graphrag
+graphrag=0.9.0
 azure-core
 azure-ai-documentintelligence
 pandas
