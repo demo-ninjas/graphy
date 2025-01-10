@@ -143,6 +143,7 @@
       "program": "${workspaceFolder}/src/graphy/bin/parse_all.py",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/runs/${input:runFolder}",
+      "args": [ "--concurrency=8" ],
       "env": {
         "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/src"
       }

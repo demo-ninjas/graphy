@@ -133,7 +133,7 @@ async def main():
         )
 
     ## Determine parser type
-    pdf_parser_type = args.get("--pdf-parser", os.getenv('PARSER', "docintelligence")).lower()
+    pdf_parser_type = args.get("--pdf-parser", os.getenv('PARSER', "smart")).lower()
     doc_parser_type = args.get("--doc-parser", os.getenv('PARSER', "docintelligence")).lower()
 
     # Create the parser
@@ -187,8 +187,11 @@ async def main():
             if file.is_file() and file.suffix.lower() in [".pdf", ".docx", ".html", ".xls", ".xlsx", ".pptx", ".ppt"]:
                 parser = pdf_parser if file.suffix.lower() == '.pdf' else doc_parser
                 futures.append(executor.submit(parse_file, file, parser, target_dir, llm, None, save_markdown, save_json, True, force))
+            elif file.suffix.lower() == ".identifier":
+                continue
             else: 
                 print(f"Skipping file: {file.name} - Unsupported file type")
+
         executor.shutdown(wait=True)
 
         success_count = 0
